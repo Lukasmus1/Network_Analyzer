@@ -3,6 +3,7 @@
 #include <pcap.h>
 
 #include "ArgParser.h"
+#include "PacketCapturing.h"
 
 int main(int argc, char* argv[])
 {
@@ -19,7 +20,16 @@ int main(int argc, char* argv[])
     }
     
     std::cout << "Interface: " << interface << "\n" << "Sort by: " << sort_by << "\n";
-    
+
+    PacketCapturing* packet_capturing = new PacketCapturing(interface, sort_by);
+
+    if (packet_capturing->start_capture() == 1)
+    {
+        delete arg_parser;
+        delete packet_capturing;
+        return 1;
+    }
+
     delete arg_parser;
     return 0;
 }
