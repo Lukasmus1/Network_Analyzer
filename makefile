@@ -1,6 +1,6 @@
 TARGET = isa-top
 
-SRCS = MainClass.cpp ArgParser.cpp PacketCapturing.cpp
+SRCS = MainClass.cpp ArgParser.cpp PacketCapturing.cpp PacketParser.cpp
 
 make: 
 	g++ -g $(SRCS) -o $(TARGET) -lpcap

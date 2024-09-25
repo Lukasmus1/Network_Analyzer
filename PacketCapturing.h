@@ -1,6 +1,8 @@
 #pragma once 
 #include <string>
 
+#include "PacketInfo.h"
+
 class PacketCapturing
 {
 public:
