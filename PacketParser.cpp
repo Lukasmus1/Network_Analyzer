@@ -16,6 +16,8 @@ PacketParser::PacketParser(const u_char* packet)
     _packet = packet;
 }
 
+PacketParser::~PacketParser() = default;
+
 PacketInfo PacketParser::parse_packet(bpf_u_int32 packet_size)
 {
     PacketInfo connection_info;
@@ -50,16 +52,6 @@ PacketInfo PacketParser::parse_packet(bpf_u_int32 packet_size)
         
         port_check(&connection_info);
     }
-    else if (type == ETHERTYPE_ARP)
-    {
-        const struct ether_arp* arp = (struct ether_arp*)(_packet + sizeof(struct ether_header));
-        connection_info.source_ip = inet_ntoa(*(struct in_addr*)arp->arp_spa);
-        connection_info.destination_ip = inet_ntoa(*(struct in_addr*)arp->arp_tpa);
-        connection_info.protocol = "arp";
-        connection_info.size = packet_size;
-        connection_info.source_port = 0;
-        connection_info.destination_port = 0;
-    }
     else
     {
         connection_info.protocol = "unknown";
@@ -83,4 +75,30 @@ void PacketParser::port_check(PacketInfo* connection_info)
         connection_info->source_port = ntohs(udp->source);
         connection_info->destination_port = ntohs(udp->dest);
     }
+}
+
+void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<PacketInfo>* packets)
+{
+    if (packets->size() == 0)
+    {
+        packets->push_back(connection_info);
+    }
+    else
+    {
+        for (PacketInfo& packet : *packets)
+        {
+            if (packet.source_ip == connection_info.source_ip && packet.destination_ip == connection_info.destination_ip && packet.source_port == connection_info.source_port && packet.destination_port == connection_info.destination_port && packet.protocol == connection_info.protocol)
+            {
+                packet.rx += connection_info.size;
+                return;
+            }
+            else if (packet.source_ip == connection_info.destination_ip && packet.destination_ip == connection_info.source_ip && packet.source_port == connection_info.destination_port && packet.destination_port == connection_info.source_port && packet.protocol == connection_info.protocol)
+            {
+                packet.tx += connection_info.size;
+                return;
+            }
+        }
+        packets->push_back(connection_info);
+    }
+    
 }

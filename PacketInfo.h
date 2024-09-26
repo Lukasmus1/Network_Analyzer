@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <pcap.h>
 
 struct PacketInfo
 {
@@ -11,4 +12,6 @@ struct PacketInfo
 
     std::string protocol;
     bpf_u_int32 size;
+    bpf_u_int32 rx;
+    bpf_u_int32 tx;
 };

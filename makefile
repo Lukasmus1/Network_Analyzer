@@ -1,9 +1,11 @@
 TARGET = isa-top
 
-SRCS = MainClass.cpp ArgParser.cpp PacketCapturing.cpp PacketParser.cpp
+SRCS = MainClass.cpp ArgParser.cpp PacketCapturing.cpp PacketParser.cpp Output.cpp
+
+LIBS = -lpcap -lncurses
 
 make: 
-	g++ -g $(SRCS) -o $(TARGET) -lpcap
+	g++ -g -Wall -Wextra $(SRCS) -o $(TARGET) $(LIBS)
 
 clean:
 	rm -f $(TARGET)

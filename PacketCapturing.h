@@ -2,6 +2,7 @@
 #include <string>
 
 #include "PacketInfo.h"
+#include "Output.h"
 
 class PacketCapturing
 {
@@ -14,4 +15,6 @@ private:
     std::string _interface;
     std::string _sort_by;
     static void packet_handler(u_char* user, const struct pcap_pkthdr* pkthdr, const u_char* packet);
+    Output* out;
+    static std::vector<PacketInfo> _packets;
 };

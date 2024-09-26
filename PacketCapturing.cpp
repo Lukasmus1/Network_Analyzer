@@ -3,9 +3,13 @@
 #include <netinet/if_ether.h>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
+#include <vector>
 
 #include "PacketCapturing.h"
 #include "PacketParser.h"
+#include "Output.h"
+
+std::vector<PacketInfo> PacketCapturing::_packets;
 
 PacketCapturing::PacketCapturing(std::string interface, std::string sort_by)
 {
@@ -14,19 +18,26 @@ PacketCapturing::PacketCapturing(std::string interface, std::string sort_by)
 }
 
 
-void PacketCapturing::packet_handler(u_char* user, const struct pcap_pkthdr* pkthdr, const u_char* packet)
-{
+void PacketCapturing::packet_handler(u_char*, const struct pcap_pkthdr* pkthdr, const u_char* packet)
+{    
     PacketParser* pp = new PacketParser(packet);
     PacketInfo pi = pp->parse_packet(pkthdr->len);
-    
+    if (pi.protocol == "unknown")
+    {
+        delete pp;
+        return;
+    }
 
-    std::cout << "Source IP: " << pi.source_ip << ":" << pi.source_port << "\n" << "Destination IP: " << pi.destination_ip << ":" << pi.destination_port << "\n" << "Protocol: " << pi.protocol << "\nSize: " << pi.size << "\n" << "\n";
+    pp->update_packet_list(pi, &_packets);
+
 }
 
 PacketCapturing::~PacketCapturing() = default;
 
 int PacketCapturing::start_capture()
 {
+    out = new Output(&_packets);
+
     char errbuf[PCAP_ERRBUF_SIZE];
 
     pcap_t* handle = pcap_open_live(_interface.c_str(), BUFSIZ, 1, 1000, errbuf);
@@ -43,5 +54,3 @@ int PacketCapturing::start_capture()
     pcap_close(handle);
     return 0;
 }
-
-//NCURSES
