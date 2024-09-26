@@ -20,7 +20,7 @@ void PacketCapturing::packet_handler(u_char* user, const struct pcap_pkthdr* pkt
     PacketInfo pi = pp->parse_packet(pkthdr->len);
     
 
-    std::cout << "Source IP: " << pi.source_ip << ":" << pi.source_port << "\n" << "Destination IP: " << pi.destination_ip << ":" << pi.destination_port << "\n" << "Protocol: " << pi.protocol << "\n";
+    std::cout << "Source IP: " << pi.source_ip << ":" << pi.source_port << "\n" << "Destination IP: " << pi.destination_ip << ":" << pi.destination_port << "\n" << "Protocol: " << pi.protocol << "\nSize: " << pi.size << "\n" << "\n";
 }
 
 PacketCapturing::~PacketCapturing() = default;

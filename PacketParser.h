@@ -11,5 +11,6 @@ public:
     ~PacketParser();
 private:
     const u_char* _packet;
+    void port_check(PacketInfo* connection_info);
 };
 
