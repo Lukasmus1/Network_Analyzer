@@ -1,5 +1,7 @@
 #include <iostream>
 #include <pcap.h>
+#include <string>
+#include <algorithm>
 #include <netinet/ip.h>
 #include <netinet/ip6.h>
 #include <netinet/if_ether.h>
@@ -11,9 +13,10 @@
 #include "PacketParser.h"
 #include "PacketInfo.h"
 
-PacketParser::PacketParser(const u_char* packet)
+PacketParser::PacketParser(const u_char* packet, std::string sort_by)
 {
     _packet = packet;
+    _sort_by = sort_by;
 }
 
 PacketParser::~PacketParser() = default;
@@ -82,23 +85,50 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
     if (packets->size() == 0)
     {
         packets->push_back(connection_info);
+        packets->at(0).rx += connection_info.size;
+        packets->at(0).packet_count++;
+        sort_packets(packets);
     }
     else
     {
         for (PacketInfo& packet : *packets)
         {
-            if (packet.source_ip == connection_info.source_ip && packet.destination_ip == connection_info.destination_ip && packet.source_port == connection_info.source_port && packet.destination_port == connection_info.destination_port && packet.protocol == connection_info.protocol)
+            if (packet.source_ip == connection_info.source_ip && packet.destination_ip == connection_info.destination_ip && 
+            packet.source_port == connection_info.source_port && packet.destination_port == connection_info.destination_port && 
+            packet.protocol == connection_info.protocol)
             {
                 packet.rx += connection_info.size;
+                packet.packet_count++;
+                sort_packets(packets);
+
                 return;
             }
-            else if (packet.source_ip == connection_info.destination_ip && packet.destination_ip == connection_info.source_ip && packet.source_port == connection_info.destination_port && packet.destination_port == connection_info.source_port && packet.protocol == connection_info.protocol)
+            else if (packet.source_ip == connection_info.destination_ip && packet.destination_ip == connection_info.source_ip && 
+            packet.source_port == connection_info.destination_port && packet.destination_port == connection_info.source_port && 
+            packet.protocol == connection_info.protocol)
             {
                 packet.tx += connection_info.size;
+                packet.packet_count++;
+                sort_packets(packets);
                 return;
             }
         }
         packets->push_back(connection_info);
+        packets->at(packets->size() - 1).rx += connection_info.size;
+        packets->at(packets->size() - 1).packet_count++;
+        sort_packets(packets);
     }
-    
+}
+
+void PacketParser::sort_packets(std::vector<PacketInfo>* packets)
+{
+    //ArgParser makes sure that _sort_by is either "b" or "p"
+    if (_sort_by == "b")
+    {
+        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.rx + a.tx > b.rx + b.tx; });
+    }
+    else if (_sort_by == "p")
+    {
+        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.packet_count > b.packet_count; });
+    }
 }

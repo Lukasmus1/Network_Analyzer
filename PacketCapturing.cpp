@@ -9,6 +9,7 @@
 #include "PacketParser.h"
 #include "Output.h"
 
+std::string PacketCapturing::_sort_by;
 std::vector<PacketInfo> PacketCapturing::_packets;
 
 PacketCapturing::PacketCapturing(std::string interface, std::string sort_by)
@@ -20,7 +21,7 @@ PacketCapturing::PacketCapturing(std::string interface, std::string sort_by)
 
 void PacketCapturing::packet_handler(u_char*, const struct pcap_pkthdr* pkthdr, const u_char* packet)
 {    
-    PacketParser* pp = new PacketParser(packet);
+    PacketParser* pp = new PacketParser(packet, _sort_by);
     PacketInfo pi = pp->parse_packet(pkthdr->len);
     if (pi.protocol == "unknown")
     {

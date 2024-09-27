@@ -11,6 +11,7 @@ struct PacketInfo
     u_int16_t destination_port;
 
     std::string protocol;
+    u_int32_t packet_count; 
     bpf_u_int32 size;
     bpf_u_int32 rx;
     bpf_u_int32 tx;
