@@ -100,7 +100,11 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
                 packet.rx += connection_info.size;
                 packet.packet_count++;
                 sort_packets(packets);
-
+                
+                if (packets->size() > 10)
+                {
+                    packets->pop_back();
+                }
                 return;
             }
             else if (packet.source_ip == connection_info.destination_ip && packet.destination_ip == connection_info.source_ip && 
@@ -110,6 +114,11 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
                 packet.tx += connection_info.size;
                 packet.packet_count++;
                 sort_packets(packets);
+
+                if (packets->size() > 10)
+                {
+                    packets->pop_back();
+                }
                 return;
             }
         }
@@ -117,18 +126,24 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
         packets->at(packets->size() - 1).rx += connection_info.size;
         packets->at(packets->size() - 1).packet_count++;
         sort_packets(packets);
+
+        if (packets->size() > 10)
+        {
+            packets->pop_back();
+        }
     }
 }
 
 void PacketParser::sort_packets(std::vector<PacketInfo>* packets)
 {
     //ArgParser makes sure that _sort_by is either "b" or "p"
-    if (_sort_by == "b")
-    {
-        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.rx + a.tx > b.rx + b.tx; });
-    }
-    else if (_sort_by == "p")
+    if (_sort_by == "p")
     {
         std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.packet_count > b.packet_count; });
+
+    }
+    else
+    {
+        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.rx + a.tx > b.rx + b.tx; });
     }
 }
