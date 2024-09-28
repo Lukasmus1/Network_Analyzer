@@ -9,10 +9,7 @@ ArgParser::ArgParser(int argc, char* argv[], std::string* interface, std::string
     _sort_by = sort_by;
 }
 
-ArgParser::~ArgParser() 
-{
-    _argv.clear();
-}
+ArgParser::~ArgParser() = default;
 
 std::string ArgParser::check_arg(const int i)
 {

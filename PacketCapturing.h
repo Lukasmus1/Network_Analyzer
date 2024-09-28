@@ -12,9 +12,11 @@ public:
     int start_capture();
 
 private:
+    static void packet_handler(u_char* user, const struct pcap_pkthdr* pkthdr, const u_char* packet);
+    static void signal_handling(int signal);
     std::string _interface;
     static std::string _sort_by;
-    static void packet_handler(u_char* user, const struct pcap_pkthdr* pkthdr, const u_char* packet);
-    Output* out;
+    static Output* out;
     static std::vector<PacketInfo> _packets;
+    static pcap_t* _handle;
 };

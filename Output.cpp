@@ -26,6 +26,16 @@ Output::~Output()
 {
     _runThreadOutput = false;
     _runThreadScreenSize = false;
+
+    if (_threadOutput.joinable())
+    {
+        _threadOutput.join();
+    }
+    if (_threadScreenSize.joinable())
+    {
+        _threadScreenSize.join();
+    }
+
     endwin();
 }
 
@@ -107,8 +117,7 @@ void Output::update_header()
 void Output::start_thread_output()
 {
     _runThreadOutput = true;
-    std::thread t(&Output::update_output, this);
-    t.detach();
+    _threadOutput = std::thread (&Output::update_output, this);
 }
 
 void Output::update_screen_size()
@@ -124,6 +133,5 @@ void Output::update_screen_size()
 void Output::start_thread_screen_size()
 {
     _runThreadScreenSize = true;
-    std::thread t(&Output::update_screen_size, this);
-    t.detach();
+    _threadScreenSize = std::thread (&Output::update_screen_size, this);
 }

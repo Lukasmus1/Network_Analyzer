@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <thread>
 
 #include "PacketInfo.h"
 
@@ -18,4 +19,5 @@ private:
     std::vector<PacketInfo>* _packets;
     int _maxX, _maxY;
     bool _runThreadOutput, _runThreadScreenSize;
+    std::thread _threadOutput, _threadScreenSize;
 };
