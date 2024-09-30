@@ -93,6 +93,7 @@ void Output::update_output()
             _packets->at(i).packet_count = 0;
         }
 
+        //Sleeping for 1 second
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
@@ -161,8 +162,11 @@ void Output::update_screen_size()
 {
     while (_runThreadScreenSize)
     {
+        //Getting the screen size
         getmaxyx(stdscr, _maxY, _maxX);
         update_header();
+
+        //Sleeping for a bit to not drain so many resources
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 }
