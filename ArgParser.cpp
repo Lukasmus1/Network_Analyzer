@@ -1,4 +1,8 @@
-﻿#include "ArgParser.h"
+﻿// Description: Class for parsing user inputted arguments. Checks for correct arguments and saves them to predefined variables.
+// Author: Lukáš Píšek (xpisek02)
+// File: ArgParser.cpp
+
+#include "ArgParser.h"
 #include <cstring>
 
 ArgParser::ArgParser(int argc, char* argv[], std::string* interface, std::string* sort_by)
@@ -9,8 +13,10 @@ ArgParser::ArgParser(int argc, char* argv[], std::string* interface, std::string
     _sort_by = sort_by;
 }
 
+//Not allocating anything here, so the destructor can be default
 ArgParser::~ArgParser() = default;
 
+//Checking next argument
 std::string ArgParser::check_arg(const int i)
 {
     if (i + 1 < _argc)

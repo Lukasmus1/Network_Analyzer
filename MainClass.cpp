@@ -1,3 +1,7 @@
+// Description: Main class of the program. It parses arguments and starts packet capturing.
+// Author: Lukáš Píšek (xpisek02)
+// File: MainClass.cpp
+
 #include <iostream>
 #include <cstring>
 #include <pcap.h>
@@ -9,6 +13,7 @@
 ArgParser* arg_parser;
 PacketCapturing* packet_capturing;
 
+//Handle the SIGINT signal (CTRL+C)
 void signal_handling(int signal)
 {
     if (signal == SIGINT)
@@ -33,6 +38,7 @@ int main(int argc, char* argv[])
 
     arg_parser = new ArgParser(argc, argv, &interface, &sort_by);
 
+    //If user inputs wrong arguments
     if (arg_parser->parse() == 1)
     {
         delete arg_parser;
@@ -41,6 +47,7 @@ int main(int argc, char* argv[])
     
     packet_capturing = new PacketCapturing(interface, sort_by);
 
+    //Usually if the interface name is wrong
     if (packet_capturing->start_capture() == 1)
     {
         delete arg_parser;

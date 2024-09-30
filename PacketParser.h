@@ -1,3 +1,7 @@
+// Description: Header file for PacketParser.cpp
+// Author: Lukáš Píšek (xpisek02)
+// File: PacketParser.h
+
 #pragma once
 #include <iostream>
 #include <vector>

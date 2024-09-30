@@ -1,4 +1,8 @@
-﻿#pragma once
+﻿// Description: Header file for ArgParser.cpp
+// Author: Lukáš Píšek (xpisek02)
+// File: ArgParser.h
+
+#pragma once
 
 #include <iostream>
 #include <vector>

@@ -1,3 +1,7 @@
+// Description: Header file for PacketCapturing.cpp
+// Author: Lukáš Píšek (xpisek02)
+// File: PacketCapturing.h
+
 #pragma once 
 #include <string>
 

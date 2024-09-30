@@ -1,3 +1,7 @@
+// Description: Struct for storing information about a packet / connection.
+// Author: Lukáš Píšek (xpisek02)
+// File: PacketInfo.h
+
 #pragma once
 #include <string>
 #include <pcap.h>

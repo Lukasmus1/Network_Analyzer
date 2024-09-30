@@ -1,3 +1,7 @@
+// Description: Header file for Output.cpp
+// Author: Lukáš Píšek (xpisek02)
+// File: Output.h
+
 #pragma once
 #include <vector>
 #include <thread>
