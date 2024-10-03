@@ -5,6 +5,10 @@
 #pragma once
 #include <vector>
 #include <thread>
+#include <ncurses.h>
+#include <sstream>
+#include <iomanip>
+#include <mutex>
 
 #include "PacketInfo.h"
 
@@ -12,6 +16,7 @@ class Output
 {
 public:
     Output(std::vector<PacketInfo>* packets);
+    std::mutex& get_mutex() { return _packetsLock; }
     ~Output();
 private:
     void start_thread_output();
@@ -24,4 +29,5 @@ private:
     int _maxX, _maxY;
     bool _runThreadOutput, _runThreadScreenSize;
     std::thread _threadOutput, _threadScreenSize;
+    std::mutex _packetsLock;
 };

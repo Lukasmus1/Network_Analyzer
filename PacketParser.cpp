@@ -2,25 +2,14 @@
 // Author: Lukáš Píšek (xpisek02)
 // File: PacketParser.cpp
 
-#include <iostream>
-#include <pcap.h>
-#include <string>
-#include <algorithm>
-#include <netinet/ip.h>
-#include <netinet/ip6.h>
-#include <netinet/if_ether.h>
-#include <netinet/ether.h>
-#include <netinet/tcp.h> 
-#include <netinet/udp.h>
-
-
 #include "PacketParser.h"
 #include "PacketInfo.h"
 
-PacketParser::PacketParser(const u_char* packet, std::string sort_by)
+PacketParser::PacketParser(const u_char* packet, std::string sort_by, Output* out)
 {
     _packet = packet;
     _sort_by = sort_by;
+    _out = out;
 }
 
 //Not allocating anything here, so the destructor can be default
@@ -61,8 +50,8 @@ PacketInfo PacketParser::parse_packet(bpf_u_int32 packet_size)
         inet_ntop(AF_INET6, &ip6->ip6_src, src, INET6_ADDRSTRLEN);
         inet_ntop(AF_INET6, &ip6->ip6_dst, dst, INET6_ADDRSTRLEN);
 
-        connection_info.source_ip = src;
-        connection_info.destination_ip = dst;
+        connection_info.source_ip = "[" + std::string(src) + "]";
+        connection_info.destination_ip = "[" + std::string(dst) + "]";
         connection_info.protocol = getprotobynumber(ip6->ip6_nxt)->p_name;
         connection_info.size = packet_size;
         
@@ -105,6 +94,9 @@ void PacketParser::port_check(PacketInfo* connection_info)
 //Method for updating the list of connections
 void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<PacketInfo>* packets)
 {
+    //Locking the mutex, so I can't modify the packets while they are being updated
+    std::unique_lock<std::mutex> lock(_out->get_mutex());
+
     //If the list is empty, add the connection
     if (packets->size() == 0)
     {
@@ -112,6 +104,10 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
         packets->at(0).rx += connection_info.size;
         packets->at(0).packet_count++;
         sort_packets(packets);
+
+        //Unlocking the mutex
+        lock.unlock();
+        return;
     }
     else
     {
@@ -120,25 +116,27 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
         {
             //If the connection is already in the list, update Rx
             if (packet.source_ip == connection_info.source_ip && packet.destination_ip == connection_info.destination_ip && 
-            packet.source_port == connection_info.source_port && packet.destination_port == connection_info.destination_port && 
-            packet.protocol == connection_info.protocol)
+                packet.source_port == connection_info.source_port && packet.destination_port == connection_info.destination_port && 
+                packet.protocol == connection_info.protocol)
             {
                 packet.rx += connection_info.size;
                 packet.packet_count++;
                 sort_packets(packets);
                 
                 //If the list is longer than 10, remove the last element
-                if (packets->size() > 10)
+                if (packets->size() > 10)   
                 {
                     packets->pop_back();
                 }
 
+                //Unlocking the mutex
+                lock.unlock();
                 return;
             }
             //If the connection is in the list, but the source and destination are switched, update Tx
             else if (packet.source_ip == connection_info.destination_ip && packet.destination_ip == connection_info.source_ip && 
-            packet.source_port == connection_info.destination_port && packet.destination_port == connection_info.source_port && 
-            packet.protocol == connection_info.protocol)
+                    packet.source_port == connection_info.destination_port && packet.destination_port == connection_info.source_port && 
+                    packet.protocol == connection_info.protocol)
             {
                 packet.tx += connection_info.size;
                 packet.packet_count++;
@@ -150,6 +148,8 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
                     packets->pop_back();
                 }
 
+                //Unlocking the mutex
+                lock.unlock();
                 return;
             }
         }
@@ -165,6 +165,9 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
         {
             packets->pop_back();
         }
+
+        //Unlocking the mutex
+        lock.unlock();
     }
 }
 

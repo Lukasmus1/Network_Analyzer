@@ -2,12 +2,6 @@
 // Author: Lukáš Píšek (xpisek02)
 // File: Output.cpp 
 
-#include <ncurses.h>
-#include <thread>
-#include <vector>
-#include <sstream>
-#include <iomanip>
-
 #include "Output.h"
 
 
@@ -51,6 +45,9 @@ void Output::update_output()
 {
     while (_runThreadOutput)
     {
+        //Locking the mutex, so I can't modify the packets while they are being printed
+        std::unique_lock<std::mutex> lock(_packetsLock);
+
         for(std::size_t i = 0; i < _packets->size(); i++)
         {
             //Clear the line before printing current connection info
@@ -62,7 +59,7 @@ void Output::update_output()
             
             //Printing connection info
             PacketInfo packet = _packets->at(i);
-
+            
             //If the port is 0, print only the IP
             if (packet.source_port == 0)
             {
@@ -92,6 +89,9 @@ void Output::update_output()
             _packets->at(i).tx = 0;
             _packets->at(i).packet_count = 0;
         }
+
+        //Unlocking the mutex
+        lock.unlock();
 
         //Sleeping for 1 second
         std::this_thread::sleep_for(std::chrono::seconds(1));

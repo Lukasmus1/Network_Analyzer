@@ -2,13 +2,6 @@
 // Author: Lukáš Píšek (xpisek02)
 // File: PacketCapturing.cpp
 
-#include <pcap.h>
-#include <iostream>
-#include <netinet/if_ether.h>
-#include <netinet/ip.h>
-#include <netinet/ip6.h>
-#include <vector>
-
 #include "PacketCapturing.h"
 #include "PacketParser.h"
 #include "Output.h"
@@ -31,7 +24,7 @@ PacketCapturing::PacketCapturing(std::string interface, std::string sort_by)
 void PacketCapturing::packet_handler(u_char*, const struct pcap_pkthdr* pkthdr, const u_char* packet)
 {    
     //Parsing the packet
-    PacketParser* pp = new PacketParser(packet, _sort_by);
+    PacketParser* pp = new PacketParser(packet, _sort_by, out);
     PacketInfo pi = pp->parse_packet(pkthdr->len);
     
     //If the packet is something else than IP or IPv6, ignore it

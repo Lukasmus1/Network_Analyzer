@@ -3,7 +3,6 @@
 // File: ArgParser.cpp
 
 #include "ArgParser.h"
-#include <cstring>
 
 ArgParser::ArgParser(int argc, char* argv[], std::string* interface, std::string* sort_by)
 {

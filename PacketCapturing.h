@@ -4,6 +4,12 @@
 
 #pragma once 
 #include <string>
+#include <pcap.h>
+#include <iostream>
+#include <netinet/if_ether.h>
+#include <netinet/ip.h>
+#include <netinet/ip6.h>
+#include <vector>
 
 #include "PacketInfo.h"
 #include "Output.h"
