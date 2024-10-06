@@ -38,6 +38,12 @@ PacketInfo PacketParser::parse_packet(bpf_u_int32 packet_size)
         
         //If the packet is UDP or TCP, get the port numbers
         port_check(&connection_info);
+
+        //Default values
+        connection_info.packet_count_rx = 0;
+        connection_info.speed_rx = 0;
+        connection_info.packet_count_tx = 0;
+        connection_info.speed_tx = 0;
     }
     else if (type == ETHERTYPE_IPV6)
     {
@@ -57,6 +63,12 @@ PacketInfo PacketParser::parse_packet(bpf_u_int32 packet_size)
         
         //If the packet is UDP or TCP, get the port numbers
         port_check(&connection_info);
+
+        //Default values
+        connection_info.packet_count_rx = 0;
+        connection_info.speed_rx = 0;
+        connection_info.packet_count_tx = 0;
+        connection_info.speed_tx = 0;
     }
     else
     {
@@ -101,8 +113,8 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
     if (packets->size() == 0)
     {
         packets->push_back(connection_info);
-        packets->at(0).rx += connection_info.size;
-        packets->at(0).packet_count++;
+        packets->at(0).speed_rx += connection_info.size;
+        packets->at(0).packet_count_rx++;
         sort_packets(packets);
 
         //Unlocking the mutex
@@ -119,8 +131,8 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
                 packet.source_port == connection_info.source_port && packet.destination_port == connection_info.destination_port && 
                 packet.protocol == connection_info.protocol)
             {
-                packet.rx += connection_info.size;
-                packet.packet_count++;
+                packet.speed_rx += connection_info.size;
+                packet.packet_count_rx++;
                 sort_packets(packets);
                 
                 //If the list is longer than 10, remove the last element
@@ -138,8 +150,8 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
                     packet.source_port == connection_info.destination_port && packet.destination_port == connection_info.source_port && 
                     packet.protocol == connection_info.protocol)
             {
-                packet.tx += connection_info.size;
-                packet.packet_count++;
+                packet.speed_tx += connection_info.size;
+                packet.packet_count_tx++;
                 sort_packets(packets);
 
                 //If the list is longer than 10, remove the last element
@@ -156,8 +168,8 @@ void PacketParser::update_packet_list(PacketInfo connection_info, std::vector<Pa
 
         //If the connection is not in the list, add a new one
         packets->push_back(connection_info);
-        packets->at(packets->size() - 1).rx += connection_info.size;
-        packets->at(packets->size() - 1).packet_count++;
+        packets->at(packets->size() - 1).speed_rx += connection_info.size;
+        packets->at(packets->size() - 1).packet_count_rx++;
         sort_packets(packets);
 
         //If the list is longer than 10, remove the last element
@@ -177,11 +189,11 @@ void PacketParser::sort_packets(std::vector<PacketInfo>* packets)
     if (_sort_by == "p")
     {
         //Sort by packet count
-        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.packet_count > b.packet_count; });
+        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.packet_count_rx + a.packet_count_tx > b.packet_count_rx + b.packet_count_tx; });
     }
     else
     {
         //Sort by Rx + Tx (byte count)
-        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.rx + a.tx > b.rx + b.tx; });
+        std::sort(packets->begin(), packets->end(), [](PacketInfo a, PacketInfo b) { return a.speed_rx + a.speed_tx > b.speed_rx + b.speed_tx; });
     }
 }

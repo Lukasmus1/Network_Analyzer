@@ -81,13 +81,16 @@ void Output::update_output()
             }
         
             mvprintw(i + 2, distanceX * 4, "%s", packet.protocol.c_str());
-            mvprintw(i + 2, distanceX * 5, "%s", format_speed(packet.rx).c_str());
-            mvprintw(i + 2, distanceX * 6, "%s", format_speed(packet.tx).c_str());
+            mvprintw(i + 2, distanceX * 5, "%s", format_speed(packet.speed_rx * 8).c_str());
+            mvprintw(i + 2, distanceX * 5.5, "%s", format_speed(packet.packet_count_rx).c_str());
+            mvprintw(i + 2, distanceX * 6, "%s", format_speed(packet.speed_tx * 8).c_str());
+            mvprintw(i + 2, distanceX * 6.5, "%s", format_speed(packet.packet_count_tx).c_str());
             
             //Refresh the speed and packet count
-            _packets->at(i).rx = 0;
-            _packets->at(i).tx = 0;
-            _packets->at(i).packet_count = 0;
+            _packets->at(i).speed_rx = 0;
+            _packets->at(i).speed_tx = 0;
+            _packets->at(i).packet_count_rx = 0;
+            _packets->at(i).packet_count_tx = 0;
         }
 
         //Unlocking the mutex
@@ -105,27 +108,27 @@ std::string Output::format_speed(bpf_u_int32 speed)
     std::stringstream ss; 
     ss << std::fixed << std::setprecision(1);
     
-    if (speed < 1024)
+    if (speed < 1000)
     {
-        return std::to_string(speed) + "b";
+        return std::to_string(speed);
     }
-    else if (speed < 1024 * 1024)
+    else if (speed < 1000 * 1000)
     {
-        float speedK = (float)speed / 1024;
+        float speedK = (float)speed / 1000;
         ss << speedK;
-        return ss.str() + "Kb";
+        return ss.str() + "K";
     }
-    else if (speed < 1024 * 1024 * 1024)
+    else if (speed < 1000 * 1000 * 1000)
     {
-        float speedM = (float)speed / (1024 * 1024);
+        float speedM = (float)speed / (1000 * 1000);
         ss << speedM;
-        return ss.str() + "Mb";
+        return ss.str() + "M";
     }
     else
     {
-        float speedG = (float)speed / (1024 * 1024 * 1024);
+        float speedG = (float)speed / (1000 * 1000 * 1000);
         ss << speedG;
-        return ss.str() + "Gb";
+        return ss.str() + "G";
     }
 }
 
@@ -145,8 +148,12 @@ void Output::update_header()
     mvprintw(0, 0, "Source IP:port");
     mvprintw(0, distanceX * 2, "Destination IP:port");
     mvprintw(0, distanceX * 4, "Protocol");
-    mvprintw(0, distanceX * 5, "Rx/s");
-    mvprintw(0, distanceX * 6, "Tx/s");
+    mvprintw(0, distanceX * 5, "Rx");
+    mvprintw(1, distanceX * 5, "b/s");
+    mvprintw(1, distanceX * 5.5, "p/s");
+    mvprintw(0, distanceX * 6, "Tx");
+    mvprintw(1, distanceX * 6, "b/s");
+    mvprintw(1, distanceX * 6.5, "p/s");
     refresh();
 }
 
