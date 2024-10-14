@@ -1,0 +1,30 @@
+.TH ISA-TOP 1
+.SH NAME    
+isa-top \- Aplikace pro získání statistik o síťovém provozu
+
+.SH SYNOPSIS
+.B isa-top
+\fB\-i\fR <\INTERFACE\fR> [\fB\-s\fR \fIp\fR]
+
+.B isa-top
+\fB\-i\fR <\INTERFACE\fR> [\fB\-s\fR \fIb\fR]
+
+.SH DESCRIPTION
+.B isa-top
+je aplikace sloužící pro výpis aktuálních přenosových rychlostí pro jednotlivé komunikující IP adresy na zadaném rozhraní.
+
+.SH OPTIONS
+.TP
+.BR \-i <\fIINTERFACE\fR>
+Vybere rozhraní, na kterém se bude monitorovat komunikace.
+
+.TP
+.BR \-s <\fIp\fR|\fIb\fR>
+Volitelný argument pro třídění vypsaných komunikací:
+.IP \[bu] 2
+\fBp\fR: Třídění podle počtu zachycených paketů.
+.IP \[bu] 2
+\fBb\fR: Třídění podle počtu bitů v komunikaci. 
+
+.SH AUTHORS
+Autor tohoto programu je Lukáš Píšek (xpisek02).
