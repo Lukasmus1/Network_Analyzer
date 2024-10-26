@@ -35,8 +35,9 @@ int main(int argc, char* argv[])
     std::signal(SIGINT, signal_handling);
     std::string interface;
     std::string sort_by;
+    std::string time;
 
-    arg_parser = new ArgParser(argc, argv, &interface, &sort_by);
+    arg_parser = new ArgParser(argc, argv, &interface, &sort_by, &time);
 
     //If user inputs wrong arguments
     if (arg_parser->parse() == 1)
@@ -45,7 +46,7 @@ int main(int argc, char* argv[])
         return 1;
     }
     
-    packet_capturing = new PacketCapturing(interface, sort_by);
+    packet_capturing = new PacketCapturing(interface, sort_by, time);
 
     //Usually if the interface name is wrong
     if (packet_capturing->start_capture() == 1)

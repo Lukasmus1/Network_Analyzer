@@ -5,9 +5,10 @@
 #include "Output.h"
 
 
-Output::Output(std::vector<PacketInfo>* packets)
+Output::Output(std::vector<PacketInfo>* packets, std::string time)
 {
     _packets = packets;
+    _time = time;
 
     //Ncurses initialization
     initscr();
@@ -97,7 +98,7 @@ void Output::update_output()
         lock.unlock();
 
         //Sleeping for 1 second
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::seconds(std::stoi(_time)));
     }
 }
 

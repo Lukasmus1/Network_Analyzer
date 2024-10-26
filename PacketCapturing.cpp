@@ -12,10 +12,11 @@ std::vector<PacketInfo> PacketCapturing::_packets;
 pcap_t* PacketCapturing::_handle;
 Output* PacketCapturing::out;
 
-PacketCapturing::PacketCapturing(std::string interface, std::string sort_by)
+PacketCapturing::PacketCapturing(std::string interface, std::string sort_by, std::string time)
 {
     _interface = interface;
     _sort_by = sort_by;
+    _time = time;
     _handle = nullptr;
     out = nullptr;
 }
@@ -69,7 +70,7 @@ int PacketCapturing::start_capture()
     }
     
     //Create new instance of Output class
-    out = new Output(&_packets);
+    out = new Output(&_packets, _time);
 
     //Start capturing packets
     pcap_loop(_handle, 0, PacketCapturing::packet_handler, nullptr);

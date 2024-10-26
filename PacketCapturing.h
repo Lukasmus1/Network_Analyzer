@@ -17,7 +17,7 @@
 class PacketCapturing
 {
 public:
-    PacketCapturing(std::string interface, std::string sort_by);
+    PacketCapturing(std::string interface, std::string sort_by, std::string time);
     ~PacketCapturing();
     int start_capture();
 
@@ -26,6 +26,7 @@ private:
     static void signal_handling(int signal);
     std::string _interface;
     static std::string _sort_by;
+    std::string _time;
     static Output* out;
     static std::vector<PacketInfo> _packets;
     static pcap_t* _handle;

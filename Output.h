@@ -15,7 +15,7 @@
 class Output
 {
 public:
-    Output(std::vector<PacketInfo>* packets);
+    Output(std::vector<PacketInfo>* packets, std::string time);
     std::mutex& get_mutex() { return _packetsLock; }
     ~Output();
 private:
@@ -24,6 +24,7 @@ private:
     void start_thread_screen_size();
     void update_screen_size();
     void update_header();
+    std::string _time;
     std::string format_speed(bpf_u_int32 speed);
     std::vector<PacketInfo>* _packets;
     int _maxX, _maxY;
