@@ -97,7 +97,7 @@ void Output::update_output()
         //Unlocking the mutex
         lock.unlock();
 
-        //Sleeping for 1 second
+        //Sleeping for -t seconds
         std::this_thread::sleep_for(std::chrono::seconds(std::stoi(_time)));
     }
 }

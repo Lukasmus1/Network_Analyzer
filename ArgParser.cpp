@@ -79,15 +79,27 @@ int ArgParser::parse()
         return 1;
     }
 
-    //If time is not not a number, crash.
-    try
+    // If time is not a valid number, crash.
+    if (!_time->empty())
     {
-        std::stof(*_time);
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Argument '-t' must be followed by a valid number\n";
-        return 1;
+        try
+        {
+            float timeValue = std::stof(*_time);
+            if (timeValue < 1)
+            {
+                *_time = "1";
+            }
+        }
+        catch (const std::invalid_argument&)
+        {
+            std::cerr << "Argument '-t' must be followed by a valid number\n";
+            return 1;
+        }
+        catch (const std::out_of_range&)
+        {
+            std::cerr << "Argument '-t' is out of range\n";
+            return 1;
+        }
     }
 
     return 0;
