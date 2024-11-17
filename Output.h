@@ -9,6 +9,7 @@
 #include <sstream>
 #include <iomanip>
 #include <mutex>
+#include <condition_variable>
 
 #include "PacketInfo.h"
 
@@ -25,10 +26,12 @@ private:
     void update_screen_size();
     void update_header();
     std::string _time;
-    std::string format_speed(bpf_u_int32 speed);
+    std::string format_speed(float speed);
     std::vector<PacketInfo>* _packets;
     int _maxX, _maxY;
     bool _runThreadOutput, _runThreadScreenSize;
     std::thread _threadOutput, _threadScreenSize;
     std::mutex _packetsLock;
+    std::condition_variable _condVar;
+    std::mutex _cvMutex;
 };

@@ -27,6 +27,9 @@ Output::~Output()
     _runThreadOutput = false;
     _runThreadScreenSize = false;
 
+    //Notifying threads to wake up
+    _condVar.notify_all();
+
     //Joining threads back to main thread
     if (_threadOutput.joinable())
     {
@@ -46,6 +49,9 @@ void Output::update_output()
 {
     while (_runThreadOutput)
     {
+        //Starting the timer that will count the time it took to print the connections
+        auto start = std::chrono::steady_clock::now();
+        
         //Locking the mutex, so I can't modify the packets while they are being printed
         std::unique_lock<std::mutex> lock(_packetsLock);
 
@@ -82,10 +88,10 @@ void Output::update_output()
             }
         
             mvprintw(i + 2, distanceX * 4, "%s", packet.protocol.c_str());
-            mvprintw(i + 2, distanceX * 5, "%s", format_speed(packet.speed_rx * 8).c_str());
-            mvprintw(i + 2, distanceX * 5.5, "%s", format_speed(packet.packet_count_rx).c_str());
-            mvprintw(i + 2, distanceX * 6, "%s", format_speed(packet.speed_tx * 8).c_str());
-            mvprintw(i + 2, distanceX * 6.5, "%s", format_speed(packet.packet_count_tx).c_str());
+            mvprintw(i + 2, distanceX * 5, "%s", format_speed(packet.speed_rx * 8 / stof(_time)).c_str());
+            mvprintw(i + 2, distanceX * 5.5, "%s", format_speed(packet.packet_count_rx / stof(_time)).c_str());
+            mvprintw(i + 2, distanceX * 6, "%s", format_speed(packet.speed_tx * 8 / stof(_time)).c_str());
+            mvprintw(i + 2, distanceX * 6.5, "%s", format_speed(packet.packet_count_tx / stof(_time)).c_str());
             
             //Refresh the speed and packet count
             _packets->at(i).speed_rx = 0;
@@ -97,13 +103,26 @@ void Output::update_output()
         //Unlocking the mutex
         lock.unlock();
 
-        //Sleeping for -t seconds
-        std::this_thread::sleep_for(std::chrono::seconds(std::stoi(_time)));
+        //Calculating the time it took to print the connections
+        auto end = std::chrono::steady_clock::now();
+
+        std::chrono::duration<double> elapsed = end - start;
+
+        if (elapsed.count() > 0)
+        {
+            //Sleeping for -t seconds - time it took to print the connections
+            std::unique_lock<std::mutex> cvMutex(_cvMutex);
+            
+            _condVar.wait_for(cvMutex, std::chrono::seconds(std::stoi(_time)) - elapsed, [this] 
+            { 
+                return !_runThreadOutput; 
+            });
+        }
     }
 }
 
 //Method for formatting the raw speed to a more readable format (Kb, Mb, Gb)
-std::string Output::format_speed(bpf_u_int32 speed)
+std::string Output::format_speed(float speed)
 {
     //Using stringstream for limiting the speed to one decimal place
     std::stringstream ss; 
@@ -111,7 +130,8 @@ std::string Output::format_speed(bpf_u_int32 speed)
     
     if (speed < 1000)
     {
-        return std::to_string(speed);
+        ss << speed;
+        return ss.str();
     }
     else if (speed < 1000 * 1000)
     {
